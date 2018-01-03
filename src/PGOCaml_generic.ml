@@ -984,7 +984,7 @@ let connect ?host ?port ?user ?password ?database
 
   let do_connect () =
     open_connection sockaddr >>= fun (ichan, chan) ->
-
+    catch (fun () ->
     (* Create the connection structure. *)
     let conn = { ichan = ichan;
 		 chan = chan;
@@ -1046,7 +1046,8 @@ let connect ?host ?port ?user ?password ?database
     in
     loop (Some msg) >>= fun () ->
 
-    return conn
+    return conn)
+      (fun e -> close_in ichan >>= fun () -> fail e)
   in
   let detail = [
     "user"; user;
